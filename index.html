@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>2027 감정평가사 1·2차 32주 스마트 플래너</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+    }
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+    .chip-btn {
+      transition: all 0.14s ease;
+    }
+    .chip-btn:active {
+      transform: scale(0.96);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
+
+  <!-- Top Sticky Header -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 px-4 py-3 shadow-sm">
+    <div class="max-w-lg mx-auto flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-600 text-white tracking-tight">2027 동차합격</span>
+          <span id="ddayBadge" class="text-xs font-extrabold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">1차 D-128</span>
+        </div>
+        <h1 class="text-sm sm:text-base font-extrabold text-slate-900 mt-0.5 truncate">32주 실전 진도 &amp; 회독 코치</h1>
+      </div>
+      <div class="flex items-center gap-1.5 shrink-0">
+        <button id="syncStatusBtn" type="button" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition">
+          <span id="syncDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span id="syncLabel">동기화</span>
+        </button>
+        <button id="openTimerBtn" type="button" class="p-2 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-200 transition" title="실무 배점 타이머">
+          <i class="fa-solid fa-stopwatch text-sm"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-lg w-full mx-auto px-4 pt-3 pb-24">
+
+    <!-- ==================== TAB 1: 오늘의 학습 ==================== -->
+    <section id="tab-today" class="space-y-4">
+      
+      <!-- Date Navigator & Daily Achievement Card -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-3">
+          <button id="prevDayBtn" type="button" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700 active:scale-95 transition" title="이전일">
+            <i class="fa-solid fa-chevron-left text-xs"></i>
+          </button>
+          <div class="text-center">
+            <div class="flex items-center justify-center gap-1.5">
+              <span id="currentWeekBadge" class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-800 text-white">1주차 · 1단계</span>
+              <input type="date" id="datePicker" min="2026-11-26" max="2027-07-03" class="text-sm font-extrabold text-slate-900 bg-transparent border-none focus:outline-none cursor-pointer" />
+            </div>
+            <p id="currentDayMeta" class="text-xs text-slate-500 mt-0.5 font-medium">2026년 11월 26일 (목) · 가용 8.0h</p>
+          </div>
+          <button id="nextDayBtn" type="button" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-700 active:scale-95 transition" title="다음일">
+            <i class="fa-solid fa-chevron-right text-xs"></i>
+          </button>
+        </div>
+
+        <!-- Special Schedule Alert Banner -->
+        <div id="specialAlertBox" class="hidden mb-3 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-start gap-2">
+          <i class="fa-solid fa-triangle-exclamation mt-0.5 text-amber-600 shrink-0"></i>
+          <span id="specialAlertText" class="font-medium leading-relaxed"></span>
+        </div>
+
+        <!-- Daily Achievement Progress Bar -->
+        <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80">
+          <div class="flex items-end justify-between mb-1.5">
+            <div>
+              <span class="text-xs font-semibold text-slate-500">오늘 목표 달성률</span>
+              <div class="flex items-baseline gap-2">
+                <span id="dailyRateText" class="text-2xl font-extrabold text-indigo-600">0%</span>
+                <span id="dailyCountText" class="text-xs font-medium text-slate-500">(0 / 0 항목 완료)</span>
+              </div>
+            </div>
+            <button id="jumpStartBtn" type="button" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100">
+              오늘/시작일
+            </button>
+          </div>
+          <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+            <div id="dailyProgressBar" class="h-full bg-indigo-600 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Subject Cards Container -->
+      <div id="todaySubjectsContainer" class="space-y-3"></div>
+
+    </section>
+
+    <!-- ==================== TAB 2: 진도·회독수 ==================== -->
+    <section id="tab-stats" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h2 class="text-base font-extrabold text-slate-900">과목별 전체 진도 &amp; 누적 회독수</h2>
+        <p class="text-xs text-slate-500 mt-0.5">세부 항목을 체크할 때마다 해당 문항·챕터의 회독수가 자동으로 +1 누적됩니다.</p>
+        <div id="overallStatsContainer" class="mt-4 space-y-4"></div>
+      </div>
+
+      <!-- Granular Repetition Inspector -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <div>
+            <h3 class="text-sm font-extrabold text-slate-900">문항·챕터별 회독수 트래커</h3>
+            <p class="text-[11px] text-slate-500">항목을 터치하거나 +/- 버튼으로 회독수를 직접 조정할 수 있습니다.</p>
+          </div>
+          <select id="roundFilterSelect" class="text-xs font-bold bg-slate-100 border border-slate-200 rounded-xl px-2.5 py-1.5 text-slate-800 focus:outline-none">
+            <option value="silmu_jonghap">실무 종합 (1~147번)</option>
+            <option value="silmu_gichul">실무 기출필수 (91제)</option>
+            <option value="silmu_yaksul">실무 약술 (33제)</option>
+            <option value="iron_yoon">이론 윤철신 (28회)</option>
+            <option value="beop_kwak">법규 곽상빈 (91Ch)</option>
+            <option value="first_all">1차 과목별 회독</option>
+          </select>
+        </div>
+
+        <!-- Round Legend -->
+        <div class="flex items-center gap-1.5 text-[11px] font-semibold mb-3 flex-wrap">
+          <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-500 border border-slate-200">0회독</span>
+          <span class="px-2 py-0.5 rounded bg-sky-100 text-sky-700 border border-sky-200">1회독</span>
+          <span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-700 border border-indigo-200">2회독</span>
+          <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-700 border border-emerald-200">3회독+</span>
+        </div>
+
+        <div id="roundGridContainer" class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-96 overflow-y-auto pr-1"></div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: 한 줄 오답 ==================== -->
+    <section id="tab-errors" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <h2 class="text-base font-extrabold text-slate-900">과목별 한 줄 오답 모아보기</h2>
+            <p class="text-xs text-slate-500">시험 직전 1일 1회독 &amp; 28주차 오답 800점 반복용 압축 노트</p>
+          </div>
+          <button id="openAddErrorBtn" type="button" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-sm hover:bg-indigo-700 active:scale-95 transition">
+            + 오답 추가
+          </button>
+        </div>
+
+        <!-- Filter Pills -->
+        <div class="flex gap-1.5 overflow-x-auto py-2" id="errorFilterBar">
+          <button type="button" data-errfilter="ALL" class="err-filter-btn px-3 py-1 rounded-full text-xs font-bold bg-slate-900 text-white">전체</button>
+          <button type="button" data-errfilter="실무" class="err-filter-btn px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">2차 실무</button>
+          <button type="button" data-errfilter="이론" class="err-filter-btn px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">2차 이론</button>
+          <button type="button" data-errfilter="법규" class="err-filter-btn px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">2차 법규</button>
+          <button type="button" data-errfilter="1차" class="err-filter-btn px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">1차 과목</button>
+        </div>
+
+        <div id="errorNotesList" class="mt-2 space-y-2.5"></div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: 로드맵·설정 ==================== -->
+    <section id="tab-roadmap" class="hidden space-y-4">
+      
+      <!-- Coach's Strict Rules -->
+      <div class="bg-slate-900 text-white rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="fa-solid fa-fire text-amber-400"></i>
+          <h2 class="text-sm font-extrabold">코치의 절대 수칙 (타협 금지)</h2>
+        </div>
+        <ul class="text-xs text-slate-300 space-y-1.5 leading-relaxed list-disc pl-4">
+          <li><strong class="text-white">오전 실무 3.5시간 마감 엄수:</strong> 종합 3회독은 1점=1.2~1.5분 꼼꼼 풀이 허용하되, 11:00 종료 후 미완료는 즉시 과목별 [이월] 버튼 처리.</li>
+          <li><strong class="text-white">이론 100% 윤철신 일원화:</strong> 0·1·3기(28회) + 이론 서브 2종(79p)만 반복. 오성범·2000점 1편·3편 배제.</li>
+          <li><strong class="text-white">법규 문장 현출:</strong> 곽상빈 91챕터 완성형 문장 암기·타이핑 후 도승하 176선 1:1 쟁점 추출.</li>
+          <li><strong class="text-white">28주차 이후:</strong> 신규 문제 금지. 끝까지 살아남은 실무 오답 800점 + 서브노트 1일 1회독 가속.</li>
+        </ul>
+      </div>
+
+      <!-- Exam Dates & Auto D-Day Settings -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+        <div>
+          <h3 class="text-sm font-extrabold text-slate-900">시험일 &amp; 자동 D-Day 전환 기준</h3>
+          <p class="text-xs text-slate-500 mt-0.5">1차 시험일(4/3)까지는 1차 D-Day, 다음 날(4/4)부터는 2차 D-Day로 자동 전환됩니다.</p>
+        </div>
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+            <label for="exam1DateInput" class="block text-[11px] font-bold text-sky-700 mb-1">1차 시험일 (기본 4/3)</label>
+            <input type="date" id="exam1DateInput" class="w-full text-xs font-extrabold text-slate-900 bg-white border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-500" />
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+            <label for="exam2DateInput" class="block text-[11px] font-bold text-rose-700 mb-1">2차 시험일 (기본 7/3)</label>
+            <input type="date" id="exam2DateInput" class="w-full text-xs font-extrabold text-slate-900 bg-white border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-500" />
+          </div>
+        </div>
+        <div class="flex justify-end">
+          <button id="resetExamDatesBtn" type="button" class="text-[11px] font-bold text-slate-500 hover:text-indigo-600 underline">기본 시험일(2027.04.03 / 2027.07.03)로 복원</button>
+        </div>
+      </div>
+
+      <!-- 6-Stage Master Roadmap -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+        <h3 class="text-sm font-extrabold text-slate-900 mb-3">32주 6단계 마스터 로드맵 (2026.11.26 ~ 2027.07.03)</h3>
+        <div class="space-y-2.5 text-xs">
+          <div class="p-3 rounded-xl bg-indigo-50/70 border border-indigo-100">
+            <div class="flex justify-between font-bold text-indigo-900">
+              <span>1단계 [1~6주] 기초·1회독 집중기</span>
+              <span>11/26 ~ 01/02</span>
+            </div>
+            <p class="text-slate-600 mt-1">1차 3,510제 1회독 완주(O/△/X) · 실무 종합 3회독 완주 · 윤철신 0~1기 · 곽상빈 91Ch 1회독</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex justify-between font-bold text-slate-900">
+              <span>2단계 [7~12주] 압축·심화기 (직장복귀 전)</span>
+              <span>01/03 ~ 02/14</span>
+            </div>
+            <p class="text-slate-600 mt-1">1차 오답(△/X) 집중 · 실무 기출필수 91제+약술 33제 · 윤철신 3기 완료 · 법규 2~3회독</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex justify-between font-bold text-slate-900">
+              <span>3~4단계 [13~19주] 직장 복귀 &amp; 1차 파이널</span>
+              <span>02/15 ~ 04/03</span>
+            </div>
+            <p class="text-slate-600 mt-1">평일 4~5h 1차 모의고사·오답 올인(1차 합격 확정) + 자투리 1h 2차 서브 유지</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex justify-between font-bold text-slate-900">
+              <span>5단계 [20~27주] 2차 전 범위 반복·회독 가속</span>
+              <span>04/04 ~ 05/29</span>
+            </div>
+            <p class="text-slate-600 mt-1">토요 스터디 전일 참석 · 실무 종합·기출 오답 소거 · 이론/법규 서브 주 1회독 달성</p>
+          </div>
+          <div class="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200">
+            <div class="flex justify-between font-bold text-emerald-900">
+              <span>6단계 [28~32주] 2차 최종 파이널 (1일 1회독)</span>
+              <span>05/30 ~ 07/03</span>
+            </div>
+            <p class="text-slate-600 mt-1">실무 최종 오답 800점 무한 반복 · 전 과목 서브 3일 1회독 → 시험 전날(7/2) 1일 1회독</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Backup & Sync Management -->
+      <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 space-y-3">
+        <h3 class="text-sm font-extrabold text-slate-900">클라우드 동기화 및 데이터 백업</h3>
+        <p class="text-xs text-slate-500">스마트폰과 PC에서 동일한 동기화 ID를 입력하면 실시간으로 진도와 회독수가 연동됩니다.</p>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="openSyncFromSettingsBtn" type="button" class="py-2.5 px-3 rounded-xl bg-indigo-600 text-white text-xs font-bold hover:bg-indigo-700 transition">
+            <i class="fa-solid fa-cloud mr-1"></i> 동기화 ID 설정
+          </button>
+          <button id="exportJsonBtn" type="button" class="py-2.5 px-3 rounded-xl bg-slate-100 text-slate-800 border border-slate-200 text-xs font-bold hover:bg-slate-200 transition">
+            <i class="fa-solid fa-download mr-1"></i> JSON 백업 저장
+          </button>
+        </div>
+        <div class="pt-1">
+          <label class="block w-full text-center py-2.5 px-3 rounded-xl bg-slate-50 text-slate-600 border border-dashed border-slate-300 text-xs font-semibold cursor-pointer hover:bg-slate-100">
+            <i class="fa-solid fa-upload mr-1"></i> 백업 파일(JSON) 불러오기
+            <input type="file" id="importJsonInput" accept=".json" class="hidden" />
+          </label>
+        </div>
+        <button id="resetAllBtn" type="button" class="w-full py-2 text-xs font-semibold text-rose-600 hover:underline">
+          전체 진도 초기화 (처음부터 다시 시작)
+        </button>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- Bottom Fixed Mobile Navigation -->
+  <nav class="fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-slate-200 safe-bottom shadow-[0_-2px_10px_rgba(0,0,0,0.03)]">
+    <div class="max-w-lg mx-auto grid grid-cols-4 h-16">
+      <button type="button" data-tab="today" class="nav-btn flex flex-col items-center justify-center gap-1 text-indigo-600 font-bold">
+        <i class="fa-solid fa-calendar-check text-lg"></i>
+        <span class="text-[11px]">오늘의 학습</span>
+      </button>
+      <button type="button" data-tab="stats" class="nav-btn flex flex-col items-center justify-center gap-1 text-slate-400 font-medium">
+        <i class="fa-solid fa-rotate text-lg"></i>
+        <span class="text-[11px]">진도·회독수</span>
+      </button>
+      <button type="button" data-tab="errors" class="nav-btn flex flex-col items-center justify-center gap-1 text-slate-400 font-medium">
+        <i class="fa-solid fa-pen-to-square text-lg"></i>
+        <span class="text-[11px]">한 줄 오답</span>
+      </button>
+      <button type="button" data-tab="roadmap" class="nav-btn flex flex-col items-center justify-center gap-1 text-slate-400 font-medium">
+        <i class="fa-solid fa-map text-lg"></i>
+        <span class="text-[11px]">로드맵·설정</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- 1. Practical Timer Modal -->
+  <div id="timerModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-5 shadow-xl space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-slate-900"><i class="fa-solid fa-stopwatch text-indigo-600 mr-1.5"></i>실무 배점 스톱워치</h3>
+        <button type="button" data-close="timerModal" class="close-modal-btn w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      
+      <div class="bg-slate-900 text-white rounded-2xl p-5 text-center">
+        <div id="timerModeBadge" class="text-xs font-bold text-indigo-300 mb-1">1.3배 꼼꼼 풀이 모드 (종합 3회독 기준)</div>
+        <div id="timerDisplay" class="text-4xl font-extrabold tracking-wider font-mono">39:00</div>
+        <div id="timerSubDisplay" class="text-xs text-slate-400 mt-1">기준 배점: 30점</div>
+      </div>
+
+      <div class="grid grid-cols-4 gap-2">
+        <button type="button" data-pts="15" class="timer-pts-btn py-2.5 rounded-xl bg-slate-100 text-xs font-bold text-slate-800 hover:bg-slate-200">15점</button>
+        <button type="button" data-pts="20" class="timer-pts-btn py-2.5 rounded-xl bg-slate-100 text-xs font-bold text-slate-800 hover:bg-slate-200">20점</button>
+        <button type="button" data-pts="30" class="timer-pts-btn py-2.5 rounded-xl bg-slate-100 text-xs font-bold text-slate-800 hover:bg-slate-200">30점</button>
+        <button type="button" data-pts="40" class="timer-pts-btn py-2.5 rounded-xl bg-slate-100 text-xs font-bold text-slate-800 hover:bg-slate-200">40점</button>
+      </div>
+
+      <div class="grid grid-cols-3 gap-2">
+        <button type="button" data-mult="1.0" class="mult-btn py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">1.0배 (실전)</button>
+        <button type="button" data-mult="1.3" class="mult-btn py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-xs font-bold text-indigo-700">1.3배 (표준)</button>
+        <button type="button" data-mult="1.5" class="mult-btn py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">1.5배 (심화)</button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 pt-1">
+        <button id="timerStartBtn" type="button" class="py-3 rounded-xl bg-indigo-600 text-white text-sm font-bold">시작</button>
+        <button id="timerResetBtn" type="button" class="py-3 rounded-xl bg-slate-100 text-slate-700 text-sm font-bold">초기화</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. One-Line Error Note Modal -->
+  <div id="errorModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-5 shadow-xl space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-slate-900">한 줄 오답 메모 기록</h3>
+        <button type="button" data-close="errorModal" class="close-modal-btn w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">과목 구분</label>
+        <select id="errSubjectInput" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm font-semibold">
+          <option value="실무">2차 실무</option>
+          <option value="이론">2차 이론</option>
+          <option value="법규">2차 법규</option>
+          <option value="1차">1차 5과목</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">문제 / 챕터 / 테마 번호</label>
+        <input type="text" id="errRefInput" placeholder="예: 종합 12번 / 곽상빈 Ch.19 / 회계 재고자산" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm" />
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-slate-700 mb-1">핵심 실수 &amp; 한 줄 처방 (길게 쓰지 마세요)</label>
+        <input type="text" id="errTextInput" placeholder="예: 개발법 철거비 — 나지상정 최유효 평가는 철거비 미고려!" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm" />
+      </div>
+      <button id="saveErrorBtn" type="button" class="w-full py-3 rounded-xl bg-indigo-600 text-white text-sm font-bold mt-2">저장하기</button>
+    </div>
+  </div>
+
+  <!-- 3. Sync & Cloud Status Modal -->
+  <div id="syncModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-5 shadow-xl space-y-3">
+      <div class="flex items-center justify-between">
+        <h3 class="text-base font-extrabold text-slate-900">PC ↔ 스마트폰 실시간 동기화</h3>
+        <button type="button" data-close="syncModal" class="close-modal-btn w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
+        <div class="flex justify-between">
+          <span class="text-slate-500">동기화 상태:</span>
+          <span id="modalSyncState" class="font-bold text-amber-600">로컬 저장 모드</span>
+        </div>
+        <div class="flex justify-between items-center gap-2">
+          <span class="text-slate-500 shrink-0">내 동기화 ID:</span>
+          <span id="modalUserId" class="font-mono text-[11px] bg-white px-2 py-0.5 rounded border border-slate-200 truncate">local-device</span>
+        </div>
+      </div>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        클라우드가 연결된 환경에서는 아래 <strong>내 ID 복사</strong> 후 다른 기기(폰 ↔ PC)에서 입력하면 양쪽 기기의 진도와 회독수가 실시간으로 연동됩니다.
+      </p>
+      <div class="flex gap-2">
+        <button id="copyUserIdBtn" type="button" class="flex-1 py-2.5 rounded-xl bg-slate-100 text-slate-800 text-xs font-bold border border-slate-200">
+          <i class="fa-regular fa-copy mr-1"></i> 내 ID 복사
+        </button>
+      </div>
+      <div class="pt-2 border-t border-slate-100">
+        <label class="block text-[11px] font-bold text-slate-500 mb-1">다른 기기 동기화 ID로 연결하기</label>
+        <div class="flex gap-2">
+          <input type="text" id="customSyncRoomInput" placeholder="복사한 동기화 ID 붙여넣기" class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono" />
+          <button id="connectSyncRoomBtn" type="button" class="px-4 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold">연결</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Custom Confirm Reset Modal (No browser confirm/alert) -->
+  <div id="resetConfirmModal" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-2xl p-5 shadow-xl space-y-4">
+      <div class="flex items-center gap-2 text-rose-600">
+        <i class="fa-solid fa-circle-exclamation text-lg"></i>
+        <h3 class="text-base font-extrabold">전체 진도 초기화</h3>
+      </div>
+      <p class="text-xs text-slate-600 leading-relaxed">
+        지금까지 체크한 모든 진도, 회독수, 이월 내역, 한 줄 오답 메모가 초기화됩니다. 진행하시겠습니까?
+      </p>
+      <div class="grid grid-cols-2 gap-2">
+        <button type="button" data-close="resetConfirmModal" class="close-modal-btn py-2.5 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold">취소</button>
+        <button id="executeResetBtn" type="button" class="py-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold">초기화 실행</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="fixed top-16 left-1/2 -translate-x-1/2 z-50 hidden bg-slate-900 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-lg transition-opacity duration-200 whitespace-nowrap">
+    알림 메시지
+  </div>
+
+  <!-- ==================== FIREBASE SYNC MODULE (SAFE GUARDED) ==================== -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    let db = null;
+    let auth = null;
+    let currentUser = null;
+    let unsubscribeSnapshot = null;
+
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'appraiser-2027-planner';
+    let firebaseConfig = null;
+    try {
+      if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+        firebaseConfig = JSON.parse(__firebase_config);
+      }
+    } catch (e) {
+      firebaseConfig = null;
+    }
+
+    function setSyncBadge(status, text) {
+      const dot = document.getElementById('syncDot');
+      const label = document.getElementById('syncLabel');
+      const modalState = document.getElementById('modalSyncState');
+      if (label) label.textContent = text;
+      if (modalState) modalState.textContent = text;
+      if (dot) {
+        dot.className = 'w-2 h-2 rounded-full ' + (
+          status === 'connected' ? 'bg-emerald-500' :
+          status === 'syncing' ? 'bg-indigo-500 animate-ping' :
+          status === 'error' ? 'bg-rose-500' : 'bg-amber-400'
+        );
+      }
+    }
+
+    function subscribeRoom(roomId) {
+      if (!db || !currentUser || !roomId) return;
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+        unsubscribeSnapshot = null;
+      }
+      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_planners', roomId);
+      unsubscribeSnapshot = onSnapshot(docRef, (snap) => {
+        if (snap.exists()) {
+          const data = snap.data();
+          if (data && typeof window.applyCloudState === 'function') {
+            window.applyCloudState(data, roomId);
+          }
+        } else if (typeof window.pushCloudState === 'function') {
+          window.pushCloudState();
+        }
+      }, (err) => {
+        console.warn('Firestore snapshot warning:', err);
+        setSyncBadge('offline', '로컬 저장');
+      });
+    }
+
+    window.pushCloudState = async function() {
+      if (!db || !currentUser || !window.appState) return;
+      const roomId = window.appState.customRoomId || currentUser.uid;
+      try {
+        setSyncBadge('syncing', '저장 중');
+        const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'user_planners', roomId);
+        await setDoc(docRef, {
+          dayLists: window.appState.dayLists || {},
+          completedMap: window.appState.completedMap || {},
+          roundCounts: window.appState.roundCounts || {},
+          errorNotes: window.appState.errorNotes || [],
+          exam1Date: window.appState.exam1Date || '2027-04-03',
+          exam2Date: window.appState.exam2Date || '2027-07-03',
+          updatedAt: window.appState.updatedAt || Date.now()
+        }, { merge: true });
+        setSyncBadge('connected', '동기화됨');
+      } catch (e) {
+        console.warn('Cloud save fallback to local:', e);
+        setSyncBadge('offline', '로컬 저장');
+      }
+    };
+
+    window.connectCustomSyncRoom = function(roomId) {
+      if (!roomId) return;
+      if (window.appState) {
+        window.appState.customRoomId = roomId;
+        if (typeof window.saveLocalOnly === 'function') window.saveLocalOnly();
+      }
+      const idEl = document.getElementById('modalUserId');
+      if (idEl) idEl.textContent = roomId;
+      subscribeRoom(roomId);
+    };
+
+    async function bootCloudSync() {
+      if (!firebaseConfig) {
+        setSyncBadge('offline', '로컬 저장');
+        return;
+      }
+      try {
+        const app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await signInWithCustomToken(auth, __initial_auth_token);
+        } else {
+          await signInAnonymously(auth);
+        }
+
+        onAuthStateChanged(auth, (user) => {
+          currentUser = user;
+          if (user) {
+            const roomId = (window.appState && window.appState.customRoomId) ? window.appState.customRoomId : user.uid;
+            const idEl = document.getElementById('modalUserId');
+            if (idEl) idEl.textContent = roomId;
+            setSyncBadge('connected', '동기화됨');
+            subscribeRoom(roomId);
+          }
+        });
+      } catch (err) {
+        console.warn('Firebase unavailable, running in localStorage mode:', err);
+        setSyncBadge('offline', '로컬 저장');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      bootCloudSync();
+    });
+  </script>
+
+  <!-- ==================== MAIN APPLICATION LOGIC ==================== -->
+  <script>
+    (function() {
+      'use strict';
+
+      const START_DATE = '2026-11-26';
+      const END_DATE = '2027-07-03';
+      const STORAGE_KEY = 'appraiser_2027_smart_planner_v2';
+
+      // Filtered 91 Core Past Questions (Excludes 35 non-core 1~15th exam items)
+      const LEE_CORE_91 = [
+        '1권 Q07(오염)', '1권 Q08(환지)', '1권 Q10(한정가)', '1권 Q14(일괄)', '1권 Q15(검토)',
+        '1권 Q16(토지3방식)', '1권 Q17(모텔)', '1권 Q18(할인점)', '1권 Q19(오피스)', '1권 Q20(공사중단)',
+        '1권 Q21(최미달)', '1권 Q22(중도적)', '1권 Q23(지가배분)', '1권 Q24(조소득승수)', '1권 Q25(집합오피스)',
+        '1권 Q26(공동주택)', '1권 Q29(지료소송)', '1권 Q30(적산법)', '1권 Q31(적산법)', '1권 Q32(임사비)',
+        '1권 Q33(사정보정)', '1권 Q34(유형임차권)', '1권 Q35(도입기계)', '1권 Q37(기계해체)', '1권 Q38(선박)',
+        '1권 Q39(비상장)', '1권 Q40(비상장)', '1권 Q41(리츠)', '1권 Q42(기업가치)', '1권 Q45(권리금)',
+        '1권 Q46(집합영업권)', '1권 Q47(일조조망)', '1권 Q48(입목)',
+        '2권 Q03(담보)', '2권 Q04(담보개발)', '2권 Q05(담보검토)', '2권 Q06(담보기계)', '2권 Q07(경매)',
+        '2권 Q08(무상양수도)', '2권 Q09(국공유처분)', '2권 Q10(종전비례율)', '2권 Q11(종전분담금)', '2권 Q12(현금청산)',
+        '2권 Q13(가로주택)', '2권 Q15(개발부담금)', '2권 Q16(분양가검토)', '2권 Q17(보증소)', '2권 Q28(매도타당성)',
+        '2권 Q29(투자타당성)', '2권 Q30(투자자문)', '2권 Q31(매입타당성)', '2권 Q32(매입타당성)', '2권 Q33(투자타당성)',
+        '2권 Q34(투자자문)', '2권 Q35(투자자문)', '2권 Q36(투자자문)', '2권 Q37(매입타당성)', '2권 Q38(개발자문)',
+        '2권 Q40(가격다원론)', '2권 Q42(적정가격)', '2권 Q47(보상토지)', '2권 Q48(보상토지)', '2권 Q49(보상토지)',
+        '2권 Q50(지장물)', '2권 Q51(지장물)', '2권 Q54(지하공간)', '2권 Q55(지하공간)', '2권 Q56(구분지상권)',
+        '2권 Q58(환매권)', '2권 Q59(잔여지)', '2권 Q60(잔여지)', '2권 Q61(미불용지)', '2권 Q62(도로)',
+        '2권 Q63(공원)', '2권 Q66(영업손실)', '2권 Q67(영업보상)', '2권 Q70(영업손실)', '2권 Q73(농업손실)',
+        '2권 Q75(재편입)', '2권 Q76(축산손실)', '2권 Q77(목적별비교)', '2권 Q78(구분소유공유)',
+        '2권 Q04-1(심화)', '2권 Q09-1(심화)', '2권 Q12-1(심화)', '2권 Q30-1(심화)', '2권 Q48-1(심화)',
+        '2권 Q55-1(심화)', '2권 Q60-1(심화)', '2권 Q66-1(심화)', '2권 Q77-1(심화)'
+      ];
+
+      // Detailed Weeks 1~3 Daily Schedule with Blocked Dates Reflected
+      const SPECIFIC_PLANS = {
+        '2026-11-26': {
+          meta: '가용 8.0h (업무발표 PPT·원고 3h 반영)',
+          alert: '업무발표 준비 3시간 불가 일정 반영: 1차 회계는 70제만 진행하고 나머지 34제는 내일 합산합니다.',
+          subjects: {
+            first: ['회계 개념체계·재무제표 (1~35번)', '재고자산 전반 (36~70번)'],
+            silmu: ['실무서브 p.1~3 (001~002) 예습', '종합 1번', '종합 2번', '종합 3번', '종합 4번', '종합 5번', '종합 6번', '종합 7번'],
+            iron: ['윤철신 0기 1회(상)', '이론서브 2-2 Ch.1 (p.1)'],
+            beop: ['곽상빈 Ch.01', '곽상빈 Ch.02', '곽상빈 Ch.03', '도승하 10, 11, 58~60 쟁점']
+          }
+        },
+        '2026-11-27': {
+          meta: '가용 11.0h · 전일 회계 잔여분 합산',
+          subjects: {
+            first: ['회계 1일차 잔여 (71~104번)', '유형자산 전반 ① (105~155번)', '유형자산 전반 ② (156~207번)'],
+            silmu: ['실무서브 p.6~9 (005~011) 예습', '종합 8번', '종합 9번', '종합 10번', '종합 11번', '종합 12번', '종합 13번', '종합 14번'],
+            iron: ['윤철신 0기 1회(하)', '이론서브 2-2 Ch.2 (p.2~4)'],
+            beop: ['곽상빈 Ch.04', '곽상빈 Ch.05', '곽상빈 Ch.06', '도승하 62번 쟁점']
+          }
+        },
+        '2026-11-28': {
+          meta: '토요일 · 1주차 실전 모의고사',
+          subjects: {
+            first: ['회계 1~207번 주간 오답(△/X) 소거'],
+            silmu: ['실무 100점 시간엄수 완주', '실무 한 줄 오답 메모'],
+            iron: ['이론 100점 10p 완주 훈련'],
+            beop: ['법규 100점 10p 완주 훈련']
+          }
+        },
+        '2026-11-29': {
+          meta: '일요일 · 주간 복습(1h) + 정상 진도(9h)',
+          subjects: {
+            first: ['민법 통칙·자연인·법인 (1~38번)', '민법 물건·법률행위 기초 (39~76번)'],
+            silmu: ['실무서브 p.4~5 (003~004) 예습', '종합 15번', '종합 16번', '종합 17번', '종합 18번', '종합 19번', '종합 20번', '종합 21번'],
+            iron: ['윤철신 0기 2회(상)', '이론서브 2-2 Ch.2 후반 (p.5~6)'],
+            beop: ['곽상빈 Ch.07', '곽상빈 Ch.08', '곽상빈 Ch.09', '도승하 63~67, 69 쟁점']
+          }
+        },
+        '2026-11-30': {
+          meta: '가용 7.5h (16:30~21:00 외부업무 반영)',
+          alert: '오후 16:30~21:00 외부업무 불가 일정 반영: 야간 이론·법규 진도는 내일(12/1)로 분산 배치했습니다.',
+          subjects: {
+            first: ['민법 법률행위·의사표시 ① (77~117번)', '민법 의사표시 ② (118~158번)'],
+            silmu: ['실무서브 p.10~13 (012~016) 예습', '종합 22번', '종합 23번', '종합 24번', '종합 25번', '종합 26번'],
+            iron: ['이론서브 2-2 가격제원칙(p.7) 눈스캔'],
+            beop: ['법규서브 p.10, 27 표 인출 테스트']
+          }
+        },
+        '2026-12-01': {
+          meta: '가용 11.0h · 전일 야간분 합산 소화',
+          subjects: {
+            first: ['민법 대리 전반 (159~200번)', '민법 무효·취소·조건기한 (201~242번)'],
+            silmu: ['실무서브 p.8, 14 (010, 018) 예습', '종합 27번', '종합 28번', '종합 29번', '종합 30번'],
+            iron: ['윤철신 0기 2회(하)', '윤철신 0기 3회(상)', '이론서브 2-2 최유효이용(p.7~9)'],
+            beop: ['곽상빈 Ch.10~12', '곽상빈 Ch.13~15', '도승하 7, 8, 30, 70~72 쟁점']
+          }
+        },
+        '2026-12-02': {
+          meta: '가용 11.0h · 정상 집중 루틴',
+          subjects: {
+            first: ['민법 소멸시효·물권총론 (243~282번)', '민법 점유권·소유권 (283~322번)'],
+            silmu: ['실무서브 p.16~18 (022~025) 예습', '종합 31번', '종합 32번', '종합 33번', '종합 34번', '종합 35번'],
+            iron: ['윤철신 0기 3회(하)', '이론서브 2-1 실무기준 p.1~2'],
+            beop: ['곽상빈 Ch.16', '곽상빈 Ch.17', '곽상빈 Ch.18', '도승하 68, 69 쟁점']
+          }
+        },
+        '2026-12-03': {
+          meta: '가용 11.0h · 민법 1회독 완료일!',
+          subjects: {
+            first: ['민법 용익물권 (323~361번)', '민법 담보물권 (362~401번 완료)'],
+            silmu: ['실무서브 p.14~15 (020~021) 예습', '종합 36번', '종합 37번', '종합 38번'],
+            iron: ['윤철신 0기 4회(상)', '이론서브 2-1 실무기준 p.3'],
+            beop: ['곽상빈 Ch.19', '곽상빈 Ch.20', '도승하 74~77, 81, 82, 87~91']
+          }
+        },
+        '2026-12-04': {
+          meta: '가용 11.0h · 회계학 재개',
+          subjects: {
+            first: ['회계 유형후반·무형자산 (208~260번)', '회계 투자부동산 (261~312번)'],
+            silmu: ['실무서브 p.20, 30 (026, 056) 예습', '종합 39번', '종합 40번', '종합 41번', '종합 42번'],
+            iron: ['윤철신 0기 4회(하)', '이론서브 2-1 실무기준 p.4'],
+            beop: ['곽상빈 Ch.21', '곽상빈 Ch.22', '도승하 20~28-1, 35~37 쟁점']
+          }
+        },
+        '2026-12-05': {
+          meta: '토요일 · 2주차 실전 모의고사',
+          subjects: {
+            first: ['민법 전범위 및 회계 누적 오답(△/X) 점검'],
+            silmu: ['실무 100점 시간엄수 완주', '실무 한 줄 오답 메모'],
+            iron: ['이론 100점 10p 완주 훈련'],
+            beop: ['법규 100점 10p 완주 훈련']
+          }
+        },
+        '2026-12-06': {
+          meta: '일요일 · 주간 복습(1h) + 정상 진도(9h)',
+          subjects: {
+            first: ['회계 금융자산 전반 (313~368번)', '회계 금융부채 전반 (369~423번)'],
+            silmu: ['실무서브 p.20~23 (029, 033, 042)', '종합 43번', '종합 44번', '종합 45번', '종합 46번'],
+            iron: ['윤철신 0기 5회(상)', '이론서브 2-2 Ch.5 (p.9~10)'],
+            beop: ['곽상빈 Ch.23~25', '곽상빈 Ch.26~27', '도승하 61, 83~86-1 쟁점']
+          }
+        },
+        '2026-12-07': {
+          meta: '가용 6.5h (11:30~17:00 외부업무 반영)',
+          alert: '11:30~17:00 외부업무 불가 일정 반영: 1차 회계는 44제만 풀고 나머지 60제는 내일(12/8) 합산합니다.',
+          subjects: {
+            first: ['회계 충당부채·자본 전반 (424~467번)'],
+            silmu: ['실무서브 p.21, 24~25, 29 예습', '종합 47번', '종합 48번', '종합 49번', '종합 50번', '종합 51번', '종합 52번'],
+            iron: ['윤철신 0기 5회(하)', '이론서브 2-2 Ch.6 (p.11~13)'],
+            beop: ['곽상빈 Ch.28~29', '곽상빈 Ch.30~31', '도승하 78, 79 쟁점']
+          }
+        },
+        '2026-12-08': {
+          meta: '가용 11.0h · 전일 회계 잔여분 합산',
+          subjects: {
+            first: ['회계 자본 후반 (468~527번)', '회계 수익인식·건설·급여 (528~627번)'],
+            silmu: ['실무서브 p.27, 31 (050~051, 057)', '종합 53번', '종합 54번', '종합 55번', '종합 56번'],
+            iron: ['윤철신 0기 6회(상)', '이론서브 2-2 인근·시장 (p.14~16)'],
+            beop: ['곽상빈 Ch.32 환매권 집중', '도승하 93~97 쟁점']
+          }
+        },
+        '2026-12-09': {
+          meta: '가용 11.0h · 정상 집중 루틴',
+          subjects: {
+            first: ['회계 법인세·EPS (628~677번)', '회계 현금흐름표 (678~727번)'],
+            silmu: ['실무서브 p.25~26 (047, 049) 예습', '종합 57번', '종합 58번', '종합 59번', '종합 60번', '종합 61번'],
+            iron: ['윤철신 0기 6회(하)', '이론서브 2-2 Ch.7 (p.17~20)'],
+            beop: ['곽상빈 Ch.33', '곽상빈 Ch.34', '도승하 92, 171~173 쟁점']
+          }
+        },
+        '2026-12-10': {
+          meta: '가용 11.0h · 원가관리회계 진입',
+          subjects: {
+            first: ['회계 원가기초·개별원가 (728~775번)', '회계 종합원가 전반 (776~824번)'],
+            silmu: ['실무서브 p.28, 32 (052~053, 058)', '종합 62번', '종합 63번', '종합 64번', '종합 65번'],
+            iron: ['윤철신 0기 7회(상)', '이론서브 2-2 Ch.10 (p.21~23)'],
+            beop: ['곽상빈 Ch.35~37', '곽상빈 Ch.38~39', '도승하 108~111 쟁점']
+          }
+        },
+        '2026-12-11': {
+          meta: '가용 11.0h · 정상 집중 루틴',
+          subjects: {
+            first: ['회계 종합원가 후반 (825~873번)', '회계 표준원가 (874~921번)'],
+            silmu: ['실무서브 p.22, 29, 33 (041, 055)', '종합 66번', '종합 67번', '종합 68번', '종합 69번', '종합 70번', '종합 71번'],
+            iron: ['윤철신 0기 7회(하)', '이론서브 2-1 토지평가 (p.5~8)'],
+            beop: ['곽상빈 Ch.40~41', '곽상빈 Ch.42~43', '도승하 98~107 쟁점']
+          }
+        },
+        '2026-12-12': {
+          meta: '토요일 · 3주차 실전 모의고사',
+          subjects: {
+            first: ['재무·원가회계 주간 오답(△/X) 점검'],
+            silmu: ['실무 100점 시간엄수 완주', '실무 한 줄 오답 메모'],
+            iron: ['이론 100점 10p 완주 훈련'],
+            beop: ['법규 100점 10p 완주 훈련']
+          }
+        }
+      };
+
+      function buildAllDays() {
+        const list = [];
+        const start = new Date(START_DATE + 'T00:00:00');
+        const end = new Date(END_DATE + 'T00:00:00');
+        const dowNames = ['일', '월', '화', '수', '목', '금', '토'];
+        let idx = 0;
+
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          const iso = `${y}-${m}-${day}`;
+          const dow = d.getDay();
+          const dowName = dowNames[dow];
+          const weekNum = idx < 3 ? 1 : Math.floor((idx - 3) / 7) + 2;
+
+          let stage = '1단계 (기초·1회독)';
+          if (weekNum >= 7 && weekNum <= 12) stage = '2단계 (압축·심화)';
+          else if (weekNum >= 13 && weekNum <= 16) stage = '3단계 (복직·1차집중)';
+          else if (weekNum >= 17 && weekNum <= 19) stage = '4단계 (1차 파이널)';
+          else if (weekNum >= 20 && weekNum <= 27) stage = '5단계 (2차 전범위)';
+          else if (weekNum >= 28) stage = '6단계 (2차 파이널)';
+
+          if (SPECIFIC_PLANS[iso]) {
+            list.push({
+              date: iso,
+              dowName,
+              weekNum,
+              stage,
+              meta: SPECIFIC_PLANS[iso].meta,
+              alert: SPECIFIC_PLANS[iso].alert || '',
+              subjects: JSON.parse(JSON.stringify(SPECIFIC_PLANS[iso].subjects))
+            });
+          } else {
+            list.push(generateDay(iso, dow, dowName, weekNum, stage, idx));
+          }
+          idx++;
+        }
+        return list;
+      }
+
+      function generateDay(iso, dow, dowName, weekNum, stage, idx) {
+        const isSat = dow === 6;
+        const isSun = dow === 0;
+
+        // Weeks 4~6 (Dec 13 ~ Jan 2)
+        if (weekNum >= 4 && weekNum <= 6) {
+          const offset = idx - 17;
+          if (isSat) {
+            return {
+              date: iso, dowName, weekNum, stage,
+              meta: `토요일 · ${weekNum}주차 실전 모의고사`,
+              alert: '',
+              subjects: {
+                first: ['1차 주간 오답(△/X) 집중 소거'],
+                silmu: ['실무 100점 시간엄수 완주', '실무 한 줄 오답 메모'],
+                iron: ['이론 100점 10p 완주 훈련'],
+                beop: ['법규 100점 10p 완주 훈련']
+              }
+            };
+          }
+          const jStart = Math.min(147, 72 + offset * 4);
+          const jEnd = Math.min(147, jStart + 3);
+          const silmuItems = ['실무서브 해당 테마 15분 예습'];
+          for (let q = jStart; q <= jEnd; q++) silmuItems.push(`종합 ${q}번`);
+
+          const kStart = Math.min(91, 44 + offset * 3);
+          const kEnd = Math.min(91, kStart + 2);
+          const beopItems = offset < 16
+            ? [`곽상빈 Ch.${String(kStart).padStart(2,'0')}`, `곽상빈 Ch.${String(Math.min(91, kStart+1)).padStart(2,'0')}`, `곽상빈 Ch.${String(kEnd).padStart(2,'0')}`, '도승하 매칭 쟁점 추출']
+            : ['도승하 미풀이 잔여 쟁점 정리', '곽상빈 Ch.01~15 고속 2회독'];
+
+          const yIdx = Math.min(10, Math.floor(offset / 2) + 1);
+          const half = offset % 2 === 0 ? '상' : '하';
+          const ironItems = offset < 16
+            ? [`윤철신 1기 ${yIdx}회(${half})`, '이론서브 2-1/2-2 암기·현출']
+            : ['윤철신 1기 10회(하) 완료', '이론서브 79p 1회독 총정리'];
+
+          let firstItems = ['1차 단원별 100제 O/△/X 소거'];
+          if (offset === 0) firstItems = ['회계 CVP·관련원가 (922~1018번 완료)'];
+          else if (offset <= 6) firstItems = [`관계법규 파트 ${offset} (약 89제 O/△/X)`];
+          else if (offset <= 16) firstItems = [`경제학 파트 ${offset - 7} (약 110제 O/△/X)`];
+          else firstItems = ['부동산학원론 기출 440제 O/X 고속스캔'];
+
+          return {
+            date: iso, dowName, weekNum, stage,
+            meta: isSun ? '일요일 · 주간 복습(1h) + 진도(9h)' : '가용 11.0h · 1단계 완주 주간',
+            alert: '',
+            subjects: {
+              first: firstItems,
+              silmu: silmuItems,
+              iron: ironItems,
+              beop: beopItems
+            }
+          };
+        }
+
+        // Weeks 7~12 (Jan 3 ~ Feb 14: Stage 2)
+        if (weekNum >= 7 && weekNum <= 12) {
+          if (isSat) {
+            return {
+              date: iso, dowName, weekNum, stage,
+              meta: `토요일 · ${weekNum}주차 실전 모의고사`,
+              alert: '',
+              subjects: {
+                first: ['1차 오답(△/X) 주간 테스트'],
+                silmu: ['기출·종합 변형 100점 시간엄수', '실무 한 줄 오답 메모'],
+                iron: ['윤철신 3기 스타일 10p 작성'],
+                beop: ['사례형 100점 10p 작성']
+              }
+            };
+          }
+          const s2Day = idx - 38;
+          const silmuItems = [];
+          if (s2Day < 24) {
+            const slice = LEE_CORE_91.slice(s2Day * 4, (s2Day + 1) * 4);
+            slice.forEach(item => silmuItems.push(item));
+            const yNum = s2Day + 1;
+            if (yNum <= 13) silmuItems.push(`유형약술 Q${String(yNum).padStart(2,'0')}`);
+            else if (yNum <= 33) silmuItems.push(`목적약술 Q${String(yNum - 13).padStart(2,'0')}`);
+          } else {
+            silmuItems.push('종합문제 오답(약 1,300점) 재풀이', '약술 33제 백지 목차 현출');
+          }
+
+          const y3Idx = Math.min(10, Math.floor((s2Day % 20) / 2) + 1);
+          const h3 = s2Day % 2 === 0 ? '상' : '하';
+          const kBase = ((s2Day * 5) % 90) + 1;
+
+          return {
+            date: iso, dowName, weekNum, stage,
+            meta: isSun ? '일요일 · 주간 누적(1h) + 심화(9h)' : '가용 11.0h · 2단계 압축·심화기',
+            alert: '',
+            subjects: {
+              first: ['회계·경제 계산 오답 60제', '민법·법규·원론 암기 오답 60제'],
+              silmu: silmuItems.length ? silmuItems : ['종합 4회독 오답 집중'],
+              iron: [`윤철신 3기 ${y3Idx}회(${h3})`, '이론서브 2-1/2-2 2회독 단권화'],
+              beop: [`곽상빈 Ch.${String(kBase).padStart(2,'0')}~${String(Math.min(91, kBase+4)).padStart(2,'0')} 고속현출`, '도승하 176선 사례 쟁점 5제']
+            }
+          };
+        }
+
+        // Weeks 13~19 (Feb 15 ~ Apr 3: Return to work, 1st Exam Final)
+        if (weekNum >= 13 && weekNum <= 19) {
+          return {
+            date: iso, dowName, weekNum, stage,
+            meta: (isSat || isSun) ? '주말(8h) · 1차 전과목 실전 모의고사' : '평일(4.5h) · 직장 복귀 & 1차 올인',
+            alert: (weekNum === 13 && dow === 1) ? '직장 복귀일: 평일 1차 100% 집중 + 자투리 1시간만 2차 서브노트 감각 유지합니다.' : '',
+            subjects: {
+              first: (isSat || isSun)
+                ? ['1차 1교시(법규·민법·원론) 실전 모의', '1차 2교시(경제·회계) 실전 모의']
+                : ['1차 5과목 X문항 압축 소거 (100제)'],
+              silmu: ['실무서브 113p 핵심 산식 15분 눈스캔'],
+              iron: ['이론서브 2-2 두문자·실무기준 15분 암기'],
+              beop: ['곽상빈 3챕터 판례 3줄 입인출']
+            }
+          };
+        }
+
+        // Weeks 20~27 (Apr 4 ~ May 29: Stage 5 - 2nd Exam All-in)
+        if (weekNum >= 20 && weekNum <= 27) {
+          return {
+            date: iso, dowName, weekNum, stage,
+            meta: isSat ? '토요일 · 서울 2차 스터디 전일 참석' : isSun ? '일요일(8h) · 스터디 복습 & 약점 보완' : '평일(5h)+자투리(1.5h) · 2차 전범위 반복',
+            alert: (weekNum === 20 && isSun) ? '1차 합격 이후 2차 전범위 체제 전환! 오늘부터 상단 배지가 2차 D-Day로 자동 표시됩니다.' : '',
+            subjects: {
+              first: ['1차 합격 완료 (자투리 시간 2차 암기 전환)'],
+              silmu: isSat ? ['서울 스터디 실무 100점 실전 응시'] : ['종합·기출 오답 60점(1점=1분 엄수)', '실무서브 113p 주 1회독 분할 스캔'],
+              iron: isSat ? ['서울 스터디 이론 100점 실전 응시'] : ['이론서브 79p 15p 백지 목차 현출', '윤철신 0·1·3기 핵심 논점 타이핑'],
+              beop: isSat ? ['서울 스터디 법규 100점 실전 응시'] : ['곽상빈 15챕터 고속 현출 + 도승하 사례']
+            }
+          };
+        }
+
+        // Special D-1 and D-Day
+        if (iso === '2027-07-02') {
+          return {
+            date: iso, dowName, weekNum, stage,
+            meta: 'D-1 (금) · 전 과목 1일 1회독 완주 & 23:30 취침 엄수',
+            alert: '시험 전날: 새로운 문제 절대 금지! 단권화 서브 1일 1회독 완주 후 23:30 반드시 취침합니다.',
+            subjects: {
+              first: ['시험장 준비물(계산기 2대·아날로그 시계·신분증) 점검'],
+              silmu: ['실무 한 줄 오답노트 전체 스캔', '약술 33제·실무서브 핵심 공식 1회독'],
+              iron: ['이론서브 79p + 윤철신 단권화 1회독 완주'],
+              beop: ['곽상빈 91챕터 + 법규서브 83p 1회독 완주']
+            }
+          };
+        }
+        if (iso === '2027-07-03') {
+          return {
+            date: iso, dowName, weekNum, stage,
+            meta: 'D-Day (토) · 2027 감정평가사 2차 최종 합격의 날',
+            alert: '',
+            subjects: {
+              first: ['점심시간 50분 최종 서브 스캔'],
+              silmu: ['1교시 실무 (100분) — 1점=1분 엄수'],
+              iron: ['2교시 이론 (100분) — 10페이지 완주'],
+              beop: ['3교시 법규 (100분) — 10페이지 완주']
+            }
+          };
+        }
+
+        // Weeks 28~32 (May 30 ~ Jul 1: Stage 6 Final Countdown)
+        return {
+          date: iso, dowName, weekNum, stage,
+          meta: isSat ? '토요일 · 실전 파이널 모의고사' : isSun ? '일요일(8h) · 누적 오답 총정리' : '평일(5h)+자투리(1.5h) · 최종 오답 800점 반복',
+          alert: '',
+          subjects: {
+            first: ['자투리 1.5h (법규 판례 3줄 + 이론 두문자 입인출)'],
+            silmu: ['최종 오답 800점 중 100점 재풀이(1점=1분)', '실무서브 113p 3일 1회독 고속 스캔'],
+            iron: ['이론서브 79p 3일 1회독 (일 26p)', '실무기준·토보지침 정의 문구 암기'],
+            beop: ['곽상빈 91Ch 3일 1회독 (일 30Ch)', '법규서브 83p 핵심 표 인출']
+          }
+        };
+      }
+
+      const MASTER_DAYS = buildAllDays();
+      const DAY_INDEX_MAP = {};
+      MASTER_DAYS.forEach((d, i) => { DAY_INDEX_MAP[d.date] = i; });
+
+      // State Initialization
+      function createDefaultState() {
+        return {
+          selectedDate: START_DATE,
+          exam1Date: '2027-04-03',
+          exam2Date: '2027-07-03',
+          dayLists: {},      // { '2026-11-26': { first: [...], silmu: [...], iron: [...], beop: [...] } }
+          completedMap: {},  // { '2026-11-26::silmu::0': true }
+          roundCounts: {},   // { 'silmu_jonghap::1': 1 }
+          errorNotes: [
+            { id: 101, subject: '실무', ref: '006 개발법', text: '나지상정 최유효이용 평가는 기존건물 철거비 미고려! 현 상태 평가 시에만 철거비 반영', date: '2026-11-26' },
+            { id: 102, subject: '법규', ref: '곽상빈 Ch.19', text: '수용재결 불복 시 이의신청은 임의적 절차이며 취소소송 대상은 원칙적으로 수용재결(원처분주의)', date: '2026-11-26' }
+          ],
+          errorFilter: 'ALL',
+          customRoomId: '',
+          updatedAt: Date.now()
+        };
+      }
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            return Object.assign(createDefaultState(), parsed);
+          }
+        } catch (e) {
+          console.warn('LocalStorage read error:', e);
+        }
+        return createDefaultState();
+      }
+
+      window.appState = loadState();
+
+      window.saveLocalOnly = function() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(window.appState));
+        } catch (e) {
+          console.warn('LocalStorage write error:', e);
+        }
+      };
+
+      function saveAllState() {
+        window.appState.updatedAt = Date.now();
+        window.saveLocalOnly();
+        if (typeof window.pushCloudState === 'function') {
+          window.pushCloudState();
+        }
+      }
+
+      window.applyCloudState = function(cloudData, roomId) {
+        if (!cloudData) return;
+        const localTs = window.appState.updatedAt || 0;
+        const cloudTs = cloudData.updatedAt || 0;
+        if (cloudTs > localTs) {
+          window.appState.dayLists = cloudData.dayLists || window.appState.dayLists;
+          window.appState.completedMap = cloudData.completedMap || window.appState.completedMap;
+          window.appState.roundCounts = cloudData.roundCounts || window.appState.roundCounts;
+          window.appState.errorNotes = cloudData.errorNotes || window.appState.errorNotes;
+          window.appState.exam1Date = cloudData.exam1Date || window.appState.exam1Date;
+          window.appState.exam2Date = cloudData.exam2Date || window.appState.exam2Date;
+          window.appState.customRoomId = roomId;
+          window.appState.updatedAt = cloudTs;
+          window.saveLocalOnly();
+          renderAll();
+        }
+      };
+
+      function showToast(msg) {
+        const el = document.getElementById('toast');
+        if (!el) return;
+        el.textContent = msg;
+        el.classList.remove('hidden');
+        clearTimeout(el._timer);
+        el._timer = setTimeout(() => {
+          el.classList.add('hidden');
+        }, 2400);
+      }
+
+      // Helper to get active item list for a date & subject
+      function getDaySubjectItems(dateStr, subjKey) {
+        if (window.appState.dayLists[dateStr] && Array.isArray(window.appState.dayLists[dateStr][subjKey])) {
+          return window.appState.dayLists[dateStr][subjKey];
+        }
+        const idx = DAY_INDEX_MAP[dateStr];
+        if (idx === undefined) return [];
+        return [...MASTER_DAYS[idx].subjects[subjKey]];
+      }
+
+      function setDaySubjectItems(dateStr, subjKey, items) {
+        if (!window.appState.dayLists[dateStr]) {
+          const idx = DAY_INDEX_MAP[dateStr];
+          const base = idx !== undefined ? MASTER_DAYS[idx].subjects : { first: [], silmu: [], iron: [], beop: [] };
+          window.appState.dayLists[dateStr] = {
+            first: [...base.first],
+            silmu: [...base.silmu],
+            iron: [...base.iron],
+            beop: [...base.beop]
+          };
+        }
+        window.appState.dayLists[dateStr][subjKey] = items;
+      }
+
+      function getItemKey(dateStr, subjKey, label) {
+        return `${dateStr}::${subjKey}::${label}`;
+      }
+
+      // Automatic Round Counter Linker
+      function adjustRoundFromLabel(label, delta) {
+        const clean = label.replace(/\s*\(이월\)\s*/g, '').replace(/\s*\(당김\)\s*/g, '').trim();
+        // Match 종합 X번
+        const mJonghap = clean.match(/종합\s*(\d+)번/);
+        if (mJonghap) {
+          const num = parseInt(mJonghap[1], 10);
+          if (num >= 1 && num <= 147) {
+            const k = `silmu_jonghap::${num}`;
+            window.appState.roundCounts[k] = Math.max(0, (window.appState.roundCounts[k] || 0) + delta);
+          }
+          return;
+        }
+        // Match 곽상빈 Ch.XX or Ch.XX~YY
+        const mKwakRange = clean.match(/곽상빈\s*Ch\.(\d+)~(\d+)/);
+        if (mKwakRange) {
+          const s = parseInt(mKwakRange[1], 10);
+          const e = parseInt(mKwakRange[2], 10);
+          for (let c = s; c <= e; c++) {
+            if (c >= 1 && c <= 91) {
+              const k = `beop_kwak::${c}`;
+              window.appState.roundCounts[k] = Math.max(0, (window.appState.roundCounts[k] || 0) + delta);
+            }
+          }
+          return;
+        }
+        const mKwakSingle = clean.match(/곽상빈\s*Ch\.(\d+)/);
+        if (mKwakSingle) {
+          const c = parseInt(mKwakSingle[1], 10);
+          if (c >= 1 && c <= 91) {
+            const k = `beop_kwak::${c}`;
+            window.appState.roundCounts[k] = Math.max(0, (window.appState.roundCounts[k] || 0) + delta);
+          }
+          return;
+        }
+        // Match 윤철신 0기/1기/3기 X회
+        const mYoon = clean.match(/윤철신\s*(0|1|3)기\s*(\d+)회/);
+        if (mYoon) {
+          const gi = mYoon[1];
+          const hoe = parseInt(mYoon[2], 10);
+          let seq = 0;
+          if (gi === '0') seq = hoe;
+          else if (gi === '1') seq = 8 + hoe;
+          else if (gi === '3') seq = 18 + hoe;
+          if (seq >= 1 && seq <= 28) {
+            const k = `iron_yoon::${seq}`;
+            window.appState.roundCounts[k] = Math.max(0, (window.appState.roundCounts[k] || 0) + delta);
+          }
+          return;
+        }
+        // Match 이용훈 기출필수
+        const gIdx = LEE_CORE_91.indexOf(clean);
+        if (gIdx !== -1) {
+          const k = `silmu_gichul::${gIdx + 1}`;
+          window.appState.roundCounts[k] = Math.max(0, (window.appState.roundCounts[k] || 0) + delta);
+          return;
+        }
+        // Match 약술
+        const mYaksul1 = clean.match(/유형약술\s*Q(\d+)/);
+        if (mYaksul1) {
+          const n = parseInt(mYaksul1[1], 10);
+          const k = `silmu_yaksul::${n}`;
+          window.appState.roundCounts[k] = Math.max(0, (window.appState.roundCounts[k] || 0) + delta);
+          return;
+        }
+        const mYaksul2 = clean.match(/목적약술\s*Q(\d+)/);
+        if (mYaksul2) {
+          const n = 13 + parseInt(mYaksul2[1], 10);
+          const k = `silmu_yaksul::${n}`;
+          window.appState.roundCounts[k] = Math.max(0, (window.appState.roundCounts[k] || 0) + delta);
+          return;
+        }
+        // Match 1차 과목
+        if (clean.includes('회계')) {
+          window.appState.roundCounts['first_all::1'] = Math.max(0, (window.appState.roundCounts['first_all::1'] || 0) + delta);
+        } else if (clean.includes('민법')) {
+          window.appState.roundCounts['first_all::2'] = Math.max(0, (window.appState.roundCounts['first_all::2'] || 0) + delta);
+        } else if (clean.includes('관계법규')) {
+          window.appState.roundCounts['first_all::3'] = Math.max(0, (window.appState.roundCounts['first_all::3'] || 0) + delta);
+        } else if (clean.includes('경제')) {
+          window.appState.roundCounts['first_all::4'] = Math.max(0, (window.appState.roundCounts['first_all::4'] || 0) + delta);
+        } else if (clean.includes('원론')) {
+          window.appState.roundCounts['first_all::5'] = Math.max(0, (window.appState.roundCounts['first_all::5'] || 0) + delta);
+        }
+      }
+
+      // ==================== D-DAY CALCULATION (1차 -> 4/4부터 2차 자동 전환) ====================
+      function updateDdayBadge(refDateStr) {
+        const badge = document.getElementById('ddayBadge');
+        if (!badge) return;
+
+        const exam1Str = window.appState.exam1Date || '2027-04-03';
+        const exam2Str = window.appState.exam2Date || '2027-07-03';
+
+        const refObj = new Date(refDateStr + 'T00:00:00');
+        const exam1Obj = new Date(exam1Str + 'T00:00:00');
+        const exam2Obj = new Date(exam2Str + 'T00:00:00');
+
+        // Up to 1st exam date (inclusive): show 1st exam D-Day
+        // From the day after 1st exam date (e.g. 2027-04-04 onwards): automatically switch to 2nd exam D-Day
+        if (refDateStr <= exam1Str) {
+          const diff1 = Math.round((exam1Obj - refObj) / (1000 * 60 * 60 * 24));
+          badge.textContent = diff1 === 0 ? '1차 D-Day' : `1차 D-${diff1}`;
+          badge.className = 'text-xs font-extrabold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200';
+        } else {
+          const diff2 = Math.round((exam2Obj - refObj) / (1000 * 60 * 60 * 24));
+          if (diff2 > 0) {
+            badge.textContent = `2차 D-${diff2}`;
+          } else if (diff2 === 0) {
+            badge.textContent = '2차 D-Day';
+          } else {
+            badge.textContent = `2차 D+${Math.abs(diff2)}`;
+          }
+          badge.className = 'text-xs font-extrabold text-rose-600 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200';
+        }
+      }
+
+      // ==================== RENDER TODAY VIEW ====================
+      const SUBJECT_META = [
+        { key: 'first', name: '1차 5과목 (객관식)', badge: '오후 12:30~17:30', color: 'sky', icon: 'fa-list-check' },
+        { key: 'silmu', name: '2차 감정평가실무', badge: '오전 07:30~11:00', color: 'indigo', icon: 'fa-calculator' },
+        { key: 'iron', name: '2차 감정평가이론', badge: '야간 19:00~20:30', color: 'violet', icon: 'fa-book-open' },
+        { key: 'beop', name: '2차 보상법규', badge: '야간 20:30~22:00', color: 'emerald', icon: 'fa-scale-balanced' }
+      ];
+
+      function renderTodayView() {
+        const curDate = window.appState.selectedDate || START_DATE;
+        const idx = DAY_INDEX_MAP[curDate] !== undefined ? DAY_INDEX_MAP[curDate] : 0;
+        const dayObj = MASTER_DAYS[idx];
+        window.appState.selectedDate = dayObj.date;
+
+        // Update D-day badge using selected date
+        updateDdayBadge(dayObj.date);
+
+        const picker = document.getElementById('datePicker');
+        if (picker) picker.value = dayObj.date;
+
+        const weekBadge = document.getElementById('currentWeekBadge');
+        if (weekBadge) weekBadge.textContent = `${dayObj.weekNum}주차 · ${dayObj.stage.split(' ')[0]}`;
+
+        const metaEl = document.getElementById('currentDayMeta');
+        if (metaEl) {
+          const parts = dayObj.date.split('-');
+          metaEl.textContent = `${parts[0]}년 ${Number(parts[1])}월 ${Number(parts[2])}일 (${dayObj.dowName}) · ${dayObj.meta}`;
+        }
+
+        const alertBox = document.getElementById('specialAlertBox');
+        const alertText = document.getElementById('specialAlertText');
+        if (alertBox && alertText) {
+          if (dayObj.alert) {
+            alertText.textContent = dayObj.alert;
+            alertBox.classList.remove('hidden');
+          } else {
+            alertBox.classList.add('hidden');
+          }
+        }
+
+        // Render Subject Cards & Calculate Daily Achievement
+        const container = document.getElementById('todaySubjectsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        let totalItems = 0;
+        let doneItems = 0;
+
+        SUBJECT_META.forEach((subj) => {
+          const items = getDaySubjectItems(dayObj.date, subj.key);
+          let subjDone = 0;
+          items.forEach((lbl) => {
+            totalItems++;
+            if (window.appState.completedMap[getItemKey(dayObj.date, subj.key, lbl)]) {
+              doneItems++;
+              subjDone++;
+            }
+          });
+
+          const subjRate = items.length > 0 ? Math.round((subjDone / items.length) * 100) : 100;
+          const isAllDone = items.length > 0 && subjDone === items.length;
+
+          const card = document.createElement('div');
+          card.className = `bg-white rounded-2xl p-4 shadow-sm border ${isAllDone ? 'border-emerald-300 bg-emerald-50/20' : 'border-slate-200'}`;
+
+          // Header row
+          const headerHtml = `
+            <div class="flex items-center justify-between gap-2 mb-2.5">
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="w-7 h-7 rounded-lg bg-${subj.color}-100 text-${subj.color}-700 flex items-center justify-center shrink-0">
+                  <i class="fa-solid ${subj.icon} text-xs"></i>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-sm font-extrabold text-slate-900 truncate">${subj.name}</h3>
+                  <span class="text-[11px] font-medium text-slate-500">${subj.badge}</span>
+                </div>
+              </div>
+              <span class="text-xs font-extrabold px-2.5 py-1 rounded-full ${isAllDone ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-700'}">
+                ${subjDone}/${items.length} (${subjRate}%)
+              </span>
+            </div>
+          `;
+
+          // Granular Clickable Chips
+          const chipsWrap = document.createElement('div');
+          chipsWrap.className = 'flex flex-wrap gap-1.5 mb-3';
+
+          if (items.length === 0) {
+            chipsWrap.innerHTML = `<span class="text-xs text-slate-400 italic py-1">배정된 항목이 없습니다.</span>`;
+          } else {
+            items.forEach((lbl) => {
+              const key = getItemKey(dayObj.date, subj.key, lbl);
+              const checked = !!window.appState.completedMap[key];
+              const isRollover = lbl.includes('(이월)');
+              const isPulled = lbl.includes('(당김)');
+
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'chip-btn inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border text-left ' + (
+                checked
+                  ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
+                  : isRollover
+                    ? 'bg-rose-50 text-rose-800 border-rose-200 hover:bg-rose-100'
+                    : isPulled
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
+                      : 'bg-slate-50 text-slate-800 border-slate-200 hover:bg-slate-100'
+              );
+              btn.innerHTML = `
+                <i class="fa-solid ${checked ? 'fa-circle-check text-white' : 'fa-regular fa-circle text-slate-400'}"></i>
+                <span>${escapeHtml(lbl)}</span>
+              `;
+              btn.addEventListener('click', () => {
+                toggleItemComplete(dayObj.date, subj.key, lbl);
+              });
+              chipsWrap.appendChild(btn);
+            });
+          }
+
+          // Per-Subject Dynamic Adjustment Buttons (이월 / 당겨서 풀기)
+          const footerWrap = document.createElement('div');
+          footerWrap.className = 'grid grid-cols-2 gap-2 pt-2 border-t border-slate-100';
+
+          const rolloverBtn = document.createElement('button');
+          rolloverBtn.type = 'button';
+          rolloverBtn.className = 'py-1.5 px-2.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200/80 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-95 transition';
+          rolloverBtn.innerHTML = `<i class="fa-solid fa-share"></i><span>미완료분 내일로 이월</span>`;
+          rolloverBtn.addEventListener('click', () => {
+            rolloverSubjectToTomorrow(dayObj.date, subj.key, subj.name);
+          });
+
+          const pullBtn = document.createElement('button');
+          pullBtn.type = 'button';
+          pullBtn.className = 'py-1.5 px-2.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200/80 text-[11px] font-bold flex items-center justify-center gap-1 active:scale-95 transition';
+          pullBtn.innerHTML = `<i class="fa-solid fa-forward-fast"></i><span>다음 진도 당겨서 풀기</span>`;
+          pullBtn.addEventListener('click', () => {
+            pullSubjectFromTomorrow(dayObj.date, subj.key, subj.name);
+          });
+
+          footerWrap.appendChild(rolloverBtn);
+          footerWrap.appendChild(pullBtn);
+
+          card.innerHTML = headerHtml;
+          card.appendChild(chipsWrap);
+          card.appendChild(footerWrap);
+          container.appendChild(card);
+        });
+
+        // Update Top Daily Progress Bar
+        const dailyRate = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
+        const rateText = document.getElementById('dailyRateText');
+        const countText = document.getElementById('dailyCountText');
+        const bar = document.getElementById('dailyProgressBar');
+        if (rateText) rateText.textContent = `${dailyRate}%`;
+        if (countText) countText.textContent = `(${doneItems} / ${totalItems} 항목 완료)`;
+        if (bar) bar.style.width = `${dailyRate}%`;
+      }
+
+      function toggleItemComplete(dateStr, subjKey, label) {
+        const key = getItemKey(dateStr, subjKey, label);
+        const nextVal = !window.appState.completedMap[key];
+        if (nextVal) {
+          window.appState.completedMap[key] = true;
+          adjustRoundFromLabel(label, 1);
+        } else {
+          delete window.appState.completedMap[key];
+          adjustRoundFromLabel(label, -1);
+        }
+        saveAllState();
+        renderTodayView();
+      }
+
+      // Per-subject Rollover: move unchecked items on dateStr into next day's list
+      function rolloverSubjectToTomorrow(dateStr, subjKey, subjName) {
+        const idx = DAY_INDEX_MAP[dateStr];
+        if (idx === undefined || idx >= MASTER_DAYS.length - 1) {
+          showToast('마지막 날짜이므로 내일로 이월할 수 없습니다.');
+          return;
+        }
+        const nextDateStr = MASTER_DAYS[idx + 1].date;
+        const todayItems = getDaySubjectItems(dateStr, subjKey);
+        const checkedItems = [];
+        const uncheckedItems = [];
+
+        todayItems.forEach((lbl) => {
+          if (window.appState.completedMap[getItemKey(dateStr, subjKey, lbl)]) {
+            checkedItems.push(lbl);
+          } else {
+            uncheckedItems.push(lbl);
+          }
+        });
+
+        if (uncheckedItems.length === 0) {
+          showToast(`${subjName}: 미완료 항목이 없습니다.`);
+          return;
+        }
+
+        const tomorrowItems = getDaySubjectItems(nextDateStr, subjKey);
+        const movedTagged = uncheckedItems.map(lbl => lbl.includes('(이월)') ? lbl : `${lbl} (이월)`);
+
+        setDaySubjectItems(dateStr, subjKey, checkedItems);
+        setDaySubjectItems(nextDateStr, subjKey, [...movedTagged, ...tomorrowItems]);
+
+        saveAllState();
+        renderTodayView();
+        showToast(`${subjName} 미완료 ${uncheckedItems.length}건을 내일(${nextDateStr.slice(5)})로 이월했습니다.`);
+      }
+
+      // Per-subject Pull Forward: pull first unchecked item from tomorrow into today
+      function pullSubjectFromTomorrow(dateStr, subjKey, subjName) {
+        const idx = DAY_INDEX_MAP[dateStr];
+        if (idx === undefined || idx >= MASTER_DAYS.length - 1) {
+          showToast('다음 날 진도가 없습니다.');
+          return;
+        }
+        const nextDateStr = MASTER_DAYS[idx + 1].date;
+        const tomorrowItems = getDaySubjectItems(nextDateStr, subjKey);
+        if (tomorrowItems.length === 0) {
+          showToast(`내일(${nextDateStr.slice(5)}) 예정된 ${subjName} 진도가 없습니다.`);
+          return;
+        }
+
+        const pulledItem = tomorrowItems[0];
+        const remainingTomorrow = tomorrowItems.slice(1);
+        const todayItems = getDaySubjectItems(dateStr, subjKey);
+        const taggedLabel = pulledItem.includes('(당김)') ? pulledItem : `${pulledItem} (당김)`;
+
+        setDaySubjectItems(nextDateStr, subjKey, remainingTomorrow);
+        setDaySubjectItems(dateStr, subjKey, [...todayItems, taggedLabel]);
+
+        saveAllState();
+        renderTodayView();
+        showToast(`내일 진도 [${pulledItem}] 항목을 오늘로 당겨왔습니다.`);
+      }
+
+      // ==================== RENDER STATS & ROUND TRACKER ====================
+      function renderStatsView() {
+        const overallContainer = document.getElementById('overallStatsContainer');
+        if (overallContainer) {
+          const categories = [
+            { id: 'silmu_jonghap', title: '2차 실무 · 종합문제집 (1~147번)', total: 147, targetRounds: 3, color: 'indigo' },
+            { id: 'silmu_gichul', title: '2차 실무 · 이용훈 기출필수 (91제)', total: 91, targetRounds: 2, color: 'blue' },
+            { id: 'silmu_yaksul', title: '2차 실무 · 기출 약술 (33제)', total: 33, targetRounds: 3, color: 'sky' },
+            { id: 'iron_yoon', title: '2차 이론 · 윤철신 0·1·3기 (28회분)', total: 28, targetRounds: 2, color: 'violet' },
+            { id: 'beop_kwak', title: '2차 법규 · 곽상빈 서브 (91챕터)', total: 91, targetRounds: 3, color: 'emerald' },
+            { id: 'first_all', title: '1차 전 과목 (회계·민법·법규·경제·원론)', total: 5, targetRounds: 3, color: 'amber' }
+          ];
+
+          overallContainer.innerHTML = categories.map((cat) => {
+            let atLeast1 = 0;
+            let sumRounds = 0;
+            for (let i = 1; i <= cat.total; i++) {
+              const r = window.appState.roundCounts[`${cat.id}::${i}`] || 0;
+              if (r >= 1) atLeast1++;
+              sumRounds += r;
+            }
+            const pct1 = Math.round((atLeast1 / cat.total) * 100);
+            const avgRound = (sumRounds / cat.total).toFixed(1);
+
+            return `
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <div class="flex items-center justify-between text-xs font-bold mb-1.5">
+                  <span class="text-slate-800">${cat.title}</span>
+                  <span class="text-${cat.color}-700">${atLeast1}/${cat.total} (${pct1}%) · 평균 ${avgRound}회독</span>
+                </div>
+                <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div class="h-full bg-${cat.color}-600 rounded-full transition-all duration-300" style="width: ${pct1}%"></div>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        renderRoundGrid();
+      }
+
+      function renderRoundGrid() {
+        const select = document.getElementById('roundFilterSelect');
+        const grid = document.getElementById('roundGridContainer');
+        if (!select || !grid) return;
+
+        const cat = select.value;
+        const items = [];
+
+        if (cat === 'silmu_jonghap') {
+          for (let i = 1; i <= 147; i++) items.push({ key: `${cat}::${i}`, label: `종합 ${i}번` });
+        } else if (cat === 'silmu_gichul') {
+          LEE_CORE_91.forEach((lbl, idx) => items.push({ key: `${cat}::${idx + 1}`, label: lbl }));
+        } else if (cat === 'silmu_yaksul') {
+          for (let i = 1; i <= 13; i++) items.push({ key: `${cat}::${i}`, label: `유형약술 Q${String(i).padStart(2,'0')}` });
+          for (let i = 1; i <= 20; i++) items.push({ key: `${cat}::${13 + i}`, label: `목적약술 Q${String(i).padStart(2,'0')}` });
+        } else if (cat === 'iron_yoon') {
+          for (let i = 1; i <= 8; i++) items.push({ key: `${cat}::${i}`, label: `0기 ${i}회` });
+          for (let i = 1; i <= 10; i++) items.push({ key: `${cat}::${8 + i}`, label: `1기 ${i}회` });
+          for (let i = 1; i <= 10; i++) items.push({ key: `${cat}::${18 + i}`, label: `3기 ${i}회` });
+        } else if (cat === 'beop_kwak') {
+          for (let i = 1; i <= 91; i++) items.push({ key: `${cat}::${i}`, label: `Ch.${String(i).padStart(2,'0')}` });
+        } else if (cat === 'first_all') {
+          const names = ['회계학(1,018제)', '민법(401제)', '관계법규(535제)', '경제학(1,116제)', '부동산학원론(440제)'];
+          names.forEach((n, idx) => items.push({ key: `${cat}::${idx + 1}`, label: n }));
+        }
+
+        grid.innerHTML = '';
+        items.forEach((it) => {
+          const count = window.appState.roundCounts[it.key] || 0;
+          let styleCls = 'bg-slate-50 text-slate-600 border-slate-200';
+          if (count === 1) styleCls = 'bg-sky-50 text-sky-800 border-sky-200';
+          else if (count === 2) styleCls = 'bg-indigo-50 text-indigo-800 border-indigo-200';
+          else if (count >= 3) styleCls = 'bg-emerald-50 text-emerald-800 border-emerald-300';
+
+          const cell = document.createElement('div');
+          cell.className = `p-2 rounded-xl border text-center flex flex-col justify-between gap-1 ${styleCls}`;
+          cell.innerHTML = `
+            <span class="text-[11px] font-bold truncate" title="${escapeHtml(it.label)}">${escapeHtml(it.label)}</span>
+            <div class="flex items-center justify-center gap-1.5">
+              <button type="button" data-act="dec" class="w-5 h-5 rounded bg-white/80 border border-slate-300/70 text-[10px] font-extrabold text-slate-700">-</button>
+              <span class="text-xs font-extrabold">${count}회</span>
+              <button type="button" data-act="inc" class="w-5 h-5 rounded bg-white/80 border border-slate-300/70 text-[10px] font-extrabold text-indigo-700">+</button>
+            </div>
+          `;
+          cell.querySelector('[data-act="dec"]').addEventListener('click', () => {
+            window.appState.roundCounts[it.key] = Math.max(0, (window.appState.roundCounts[it.key] || 0) - 1);
+            saveAllState();
+            renderStatsView();
+          });
+          cell.querySelector('[data-act="inc"]').addEventListener('click', () => {
+            window.appState.roundCounts[it.key] = (window.appState.roundCounts[it.key] || 0) + 1;
+            saveAllState();
+            renderStatsView();
+          });
+          grid.appendChild(cell);
+        });
+      }
+
+      // ==================== RENDER ERROR NOTES ====================
+      function renderErrorNotes() {
+        const listEl = document.getElementById('errorNotesList');
+        if (!listEl) return;
+
+        const filter = window.appState.errorFilter || 'ALL';
+        const notes = (window.appState.errorNotes || []).filter(n => filter === 'ALL' || n.subject === filter);
+
+        if (notes.length === 0) {
+          listEl.innerHTML = `<div class="text-center py-8 text-xs text-slate-400">등록된 한 줄 오답 메모가 없습니다.</div>`;
+          return;
+        }
+
+        listEl.innerHTML = '';
+        notes.slice().reverse().forEach((note) => {
+          const badgeColor =
+            note.subject === '실무' ? 'bg-indigo-100 text-indigo-700' :
+            note.subject === '이론' ? 'bg-violet-100 text-violet-700' :
+            note.subject === '법규' ? 'bg-emerald-100 text-emerald-700' : 'bg-sky-100 text-sky-700';
+
+          const card = document.createElement('div');
+          card.className = 'p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-start justify-between gap-2';
+          card.innerHTML = `
+            <div class="min-w-0 flex-1">
+              <div class="flex items-center gap-1.5 mb-1">
+                <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${badgeColor}">${escapeHtml(note.subject)}</span>
+                <span class="text-xs font-extrabold text-slate-800 truncate">${escapeHtml(note.ref)}</span>
+                <span class="text-[10px] text-slate-400 ml-auto shrink-0">${escapeHtml(note.date || '')}</span>
+              </div>
+              <p class="text-xs text-slate-700 leading-relaxed font-medium">${escapeHtml(note.text)}</p>
+            </div>
+            <button type="button" class="del-err-btn text-slate-400 hover:text-rose-600 p-1 shrink-0" title="삭제">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+          `;
+          card.querySelector('.del-err-btn').addEventListener('click', () => {
+            window.appState.errorNotes = window.appState.errorNotes.filter(item => item.id !== note.id);
+            saveAllState();
+            renderErrorNotes();
+            showToast('오답 메모가 삭제되었습니다.');
+          });
+          listEl.appendChild(card);
+        });
+      }
+
+      // ==================== PRACTICAL SCORE TIMER ====================
+      let timerPoints = 30;
+      let timerMult = 1.3;
+      let timerRemainingSec = Math.round(30 * 1.3 * 60);
+      let timerInterval = null;
+
+      function updateTimerUI() {
+        const display = document.getElementById('timerDisplay');
+        const sub = document.getElementById('timerSubDisplay');
+        const badge = document.getElementById('timerModeBadge');
+        if (!display || !sub || !badge) return;
+
+        const mins = Math.floor(timerRemainingSec / 60);
+        const secs = timerRemainingSec % 60;
+        display.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+        sub.textContent = `기준 배점: ${timerPoints}점 (${Math.round(timerPoints * timerMult)}분 설정)`;
+        badge.textContent = timerMult === 1.0
+          ? '1.0배 실전 스피드 모드 (1점 = 1분)'
+          : `${timerMult.toFixed(1)}배 꼼꼼 풀이 모드 (종합 3회독 기준)`;
+      }
+
+      function resetTimerState() {
+        if (timerInterval) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+        timerRemainingSec = Math.round(timerPoints * timerMult * 60);
+        const startBtn = document.getElementById('timerStartBtn');
+        if (startBtn) startBtn.textContent = '시작';
+        updateTimerUI();
+      }
+
+      // ==================== NAVIGATION & MODALS ====================
+      function switchTab(tabName) {
+        ['today', 'stats', 'errors', 'roadmap'].forEach((t) => {
+          const sec = document.getElementById(`tab-${t}`);
+          if (sec) sec.classList.toggle('hidden', t !== tabName);
+        });
+        document.querySelectorAll('.nav-btn').forEach((btn) => {
+          const active = btn.getAttribute('data-tab') === tabName;
+          btn.className = `nav-btn flex flex-col items-center justify-center gap-1 ${active ? 'text-indigo-600 font-bold' : 'text-slate-400 font-medium'}`;
+        });
+
+        if (tabName === 'today') renderTodayView();
+        else if (tabName === 'stats') renderStatsView();
+        else if (tabName === 'errors') renderErrorNotes();
+        else if (tabName === 'roadmap') {
+          const e1 = document.getElementById('exam1DateInput');
+          const e2 = document.getElementById('exam2DateInput');
+          if (e1) e1.value = window.appState.exam1Date || '2027-04-03';
+          if (e2) e2.value = window.appState.exam2Date || '2027-07-03';
+        }
+      }
+
+      function openModal(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('hidden');
+      }
+
+      function closeModal(id) {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      }
+
+      function escapeHtml(str) {
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function renderAll() {
+        renderTodayView();
+        renderStatsView();
+        renderErrorNotes();
+        const e1 = document.getElementById('exam1DateInput');
+        const e2 = document.getElementById('exam2DateInput');
+        if (e1) e1.value = window.appState.exam1Date || '2027-04-03';
+        if (e2) e2.value = window.appState.exam2Date || '2027-07-03';
+      }
+
+      // ==================== EVENT LISTENERS BINDING ====================
+      document.addEventListener('DOMContentLoaded', () => {
+        // Bottom Nav
+        document.querySelectorAll('.nav-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            switchTab(btn.getAttribute('data-tab'));
+          });
+        });
+
+        // Date Navigation
+        document.getElementById('prevDayBtn').addEventListener('click', () => {
+          const curIdx = DAY_INDEX_MAP[window.appState.selectedDate] || 0;
+          if (curIdx > 0) {
+            window.appState.selectedDate = MASTER_DAYS[curIdx - 1].date;
+            window.saveLocalOnly();
+            renderTodayView();
+          } else {
+            showToast('첫날(2026-11-26)입니다.');
+          }
+        });
+
+        document.getElementById('nextDayBtn').addEventListener('click', () => {
+          const curIdx = DAY_INDEX_MAP[window.appState.selectedDate] || 0;
+          if (curIdx < MASTER_DAYS.length - 1) {
+            window.appState.selectedDate = MASTER_DAYS[curIdx + 1].date;
+            window.saveLocalOnly();
+            renderTodayView();
+          } else {
+            showToast('2차 시험일(2027-07-03)입니다.');
+          }
+        });
+
+        document.getElementById('datePicker').addEventListener('change', (e) => {
+          const val = e.target.value;
+          if (DAY_INDEX_MAP[val] !== undefined) {
+            window.appState.selectedDate = val;
+            window.saveLocalOnly();
+            renderTodayView();
+          }
+        });
+
+        document.getElementById('jumpStartBtn').addEventListener('click', () => {
+          const todayIso = new Date().toISOString().split('T')[0];
+          window.appState.selectedDate = DAY_INDEX_MAP[todayIso] !== undefined ? todayIso : START_DATE;
+          window.saveLocalOnly();
+          renderTodayView();
+          showToast(`기준일(${window.appState.selectedDate})로 이동했습니다.`);
+        });
+
+        // Round Tracker Filter
+        document.getElementById('roundFilterSelect').addEventListener('change', renderRoundGrid);
+
+        // Error Notes Filter & Add
+        document.querySelectorAll('.err-filter-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            window.appState.errorFilter = btn.getAttribute('data-errfilter');
+            document.querySelectorAll('.err-filter-btn').forEach((b) => {
+              const active = b === btn;
+              b.className = `err-filter-btn px-3 py-1 rounded-full text-xs font-bold ${active ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`;
+            });
+            renderErrorNotes();
+          });
+        });
+
+        document.getElementById('openAddErrorBtn').addEventListener('click', () => openModal('errorModal'));
+        document.getElementById('saveErrorBtn').addEventListener('click', () => {
+          const subject = document.getElementById('errSubjectInput').value;
+          const ref = document.getElementById('errRefInput').value.trim();
+          const text = document.getElementById('errTextInput').value.trim();
+          if (!ref || !text) {
+            showToast('문제 번호와 한 줄 처방 내용을 모두 입력해 주세요.');
+            return;
+          }
+          window.appState.errorNotes.push({
+            id: Date.now(),
+            subject,
+            ref,
+            text,
+            date: window.appState.selectedDate
+          });
+          document.getElementById('errRefInput').value = '';
+          document.getElementById('errTextInput').value = '';
+          saveAllState();
+          closeModal('errorModal');
+          renderErrorNotes();
+          showToast('한 줄 오답 메모가 저장되었습니다.');
+        });
+
+        // Exam Date Settings
+        document.getElementById('exam1DateInput').addEventListener('change', (e) => {
+          if (e.target.value) {
+            window.appState.exam1Date = e.target.value;
+            saveAllState();
+            updateDdayBadge(window.appState.selectedDate);
+            showToast('1차 시험일이 변경되었습니다.');
+          }
+        });
+        document.getElementById('exam2DateInput').addEventListener('change', (e) => {
+          if (e.target.value) {
+            window.appState.exam2Date = e.target.value;
+            saveAllState();
+            updateDdayBadge(window.appState.selectedDate);
+            showToast('2차 시험일이 변경되었습니다.');
+          }
+        });
+        document.getElementById('resetExamDatesBtn').addEventListener('click', () => {
+          window.appState.exam1Date = '2027-04-03';
+          window.appState.exam2Date = '2027-07-03';
+          document.getElementById('exam1DateInput').value = '2027-04-03';
+          document.getElementById('exam2DateInput').value = '2027-07-03';
+          saveAllState();
+          updateDdayBadge(window.appState.selectedDate);
+          showToast('기본 시험일(4/3, 7/3)로 복원되었습니다.');
+        });
+
+        // Timer Controls
+        document.getElementById('openTimerBtn').addEventListener('click', () => openModal('timerModal'));
+        document.querySelectorAll('.timer-pts-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            timerPoints = parseInt(btn.getAttribute('data-pts'), 10);
+            resetTimerState();
+          });
+        });
+        document.querySelectorAll('.mult-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            timerMult = parseFloat(btn.getAttribute('data-mult'));
+            document.querySelectorAll('.mult-btn').forEach((b) => {
+              const active = b === btn;
+              b.className = active
+                ? 'mult-btn py-2.5 rounded-xl border-2 border-indigo-600 bg-indigo-50 text-xs font-bold text-indigo-700'
+                : 'mult-btn py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-600';
+            });
+            resetTimerState();
+          });
+        });
+        document.getElementById('timerStartBtn').addEventListener('click', () => {
+          const btn = document.getElementById('timerStartBtn');
+          if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            btn.textContent = '계속';
+          } else {
+            btn.textContent = '일시정지';
+            timerInterval = setInterval(() => {
+              if (timerRemainingSec > 0) {
+                timerRemainingSec--;
+                updateTimerUI();
+              } else {
+                clearInterval(timerInterval);
+                timerInterval = null;
+                btn.textContent = '종료됨';
+                showToast('배점 제한 시간이 종료되었습니다! 다음 문제로 넘어가세요.');
+              }
+            }, 1000);
+          }
+        });
+        document.getElementById('timerResetBtn').addEventListener('click', resetTimerState);
+
+        // Sync Modal & Clipboard
+        document.getElementById('syncStatusBtn').addEventListener('click', () => openModal('syncModal'));
+        document.getElementById('openSyncFromSettingsBtn').addEventListener('click', () => openModal('syncModal'));
+        document.getElementById('copyUserIdBtn').addEventListener('click', () => {
+          const idText = document.getElementById('modalUserId').textContent;
+          const temp = document.createElement('textarea');
+          temp.value = idText;
+          document.body.appendChild(temp);
+          temp.select();
+          try {
+            document.execCommand('copy');
+            showToast('동기화 ID가 클립보드에 복사되었습니다.');
+          } catch (err) {
+            showToast('ID 복사에 실패했습니다.');
+          }
+          document.body.removeChild(temp);
+        });
+        document.getElementById('connectSyncRoomBtn').addEventListener('click', () => {
+          const roomVal = document.getElementById('customSyncRoomInput').value.trim();
+          if (!roomVal) {
+            showToast('동기화 ID를 입력해 주세요.');
+            return;
+          }
+          if (typeof window.connectCustomSyncRoom === 'function') {
+            window.connectCustomSyncRoom(roomVal);
+          }
+          closeModal('syncModal');
+          showToast('동기화 ID 연결을 시도합니다.');
+        });
+
+        // JSON Backup Export / Import / Reset
+        document.getElementById('exportJsonBtn').addEventListener('click', () => {
+          const blob = new Blob([JSON.stringify(window.appState, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `2027_감정평가사_진도백업_${window.appState.selectedDate}.json`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showToast('JSON 백업 파일이 저장되었습니다.');
+        });
+
+        document.getElementById('importJsonInput').addEventListener('change', (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            try {
+              const imported = JSON.parse(ev.target.result);
+              window.appState = Object.assign(createDefaultState(), imported);
+              saveAllState();
+              renderAll();
+              showToast('백업 데이터를 성공적으로 불러왔습니다.');
+            } catch (err) {
+              showToast('올바르지 않은 백업 파일입니다.');
+            }
+          };
+          reader.readAsText(file);
+        });
+
+        document.getElementById('resetAllBtn').addEventListener('click', () => openModal('resetConfirmModal'));
+        document.getElementById('executeResetBtn').addEventListener('click', () => {
+          const keepRoom = window.appState.customRoomId;
+          window.appState = createDefaultState();
+          window.appState.customRoomId = keepRoom;
+          saveAllState();
+          closeModal('resetConfirmModal');
+          renderAll();
+          showToast('전체 진도가 초기화되었습니다.');
+        });
+
+        // Close Modal Buttons
+        document.querySelectorAll('.close-modal-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            closeModal(btn.getAttribute('data-close'));
+          });
+        });
+
+        // Initial Render
+        renderAll();
+        updateTimerUI();
+      });
+    })();
+  </script>
+</body>
+</html>
